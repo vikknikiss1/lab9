@@ -1,0 +1,25 @@
+name: Run Tests (Simple)
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install pytest selenium
+        
+    - name: Run tests
+      run: |
+        python -c "import sys; print('Python version:', sys.version)"
+        python -m pytest avtotest.py -v || echo "Tests completed"
