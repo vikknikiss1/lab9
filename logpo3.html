@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация | ТПО 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background-color: #edeef0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #4a76a8;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        
+        .registration-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #656565;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d3d9de;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4a76a8;
+        }
+        
+        .form-control.error {
+            border-color: #e64646;
+        }
+        
+        .error-message {
+            color: #e64646;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: #4a76a8;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: #3d6899;
+        }
+        
+        .submit-btn:disabled {
+            background: #a8b9c9;
+            cursor: not-allowed;
+        }
+        
+        .success-message {
+            background: #4bb34b;
+            color: white;
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .password-strength {
+            height: 4px;
+            background: #e1e3e6;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+        }
+        
+        .strength-weak { 
+            background: #e64646; 
+            width: 33%; 
+        }
+        
+        .strength-medium { 
+            background: #ffa000; 
+            width: 66%; 
+        }
+        
+        .strength-strong { 
+            background: #4bb34b; 
+            width: 100%; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>Регистрация</h1>
+        </div>
+        
+        <form class="registration-form" id="registrationForm">
+            <div class="form-group">
+                <label for="email">Электронная почта</label>
+                <input type="email" class="form-control" id="email" placeholder="example@mail.ru">
+                <div class="error-message" id="emailError">Введите корректный email адрес</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Номер телефона</label>
+                <input type="tel" class="form-control" id="phone" placeholder="+7XXXXXXXXXX" maxlength="12">
+                <div class="error-message" id="phoneError">Номер должен начинаться с +7 и содержать 11 цифр</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" class="form-control" id="password" placeholder="Не менее 8 символов">
+                <div class="password-strength">
+                    <div class="strength-bar" id="passwordStrength"></div>
+                </div>
+                <div class="error-message" id="passwordError">Пароль должен содержать минимум 8 символов</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Повторите пароль</label>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Повторите пароль">
+                <div class="error-message" id="confirmPasswordError">Пароли не совпадают</div>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>Зарегистрироваться</button>
+            
+            <div class="success-message" id="successMessage">
+                Регистрация прошла успешно!
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('registrationForm');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        
+        // Элементы для отображения ошибок
+        const emailError = document.getElementById('emailError');
+        const phoneError = document.getElementById('phoneError');
+        const passwordError = document.getElementById('passwordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+        const passwordStrength = document.getElementById('passwordStrength');
+        
+        // Валидация email
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Валидация телефона
+        function validatePhone(phone) {
+            const phoneRegex = /^\+7\d{10}$/;
+            return phoneRegex.test(phone);
+        }
+        
+        // Валидация пароля
+        function validatePassword(password) {
+            return password.length >= 8;
+        }
+        
+        // Проверка совпадения паролей
+        function validatePasswordMatch(password, confirmPassword) {
+            return password === confirmPassword;
+        }
+        
+        // Оценка сложности пароля
+        function getPasswordStrength(password) {
+            if (password.length === 0) return '';
+            if (password.length < 8) return 'strength-weak';
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            if (strength <= 2) return 'strength-weak';
+            if (strength <= 4) return 'strength-medium';
+            return 'strength-strong';
+        }
+        
+        // Обновление состояния кнопки отправки
+        function updateSubmitButton() {
+            const isEmailValid = validateEmail(emailInput.value);
+            const isPhoneValid = validatePhone(phoneInput.value);
+            const isPasswordValid = validatePassword(passwordInput.value);
+            const isPasswordMatch = validatePasswordMatch(passwordInput.value, confirmPasswordInput.value);
+            
+            submitBtn.disabled = !(isEmailValid && isPhoneValid && isPasswordValid && isPasswordMatch);
+        }
+        
+        // Обработчики событий
+        emailInput.addEventListener('input', function() {
+            const isValid = validateEmail(this.value);
+            this.classList.toggle('error', !isValid);
+            emailError.style.display = !isValid && this.value ? 'block' : 'none';
+            updateSubmitButton();
+        });
+        
+        phoneInput.addEventListener('input', function() {
+            // Автоматическое добавление +7 в начало
+            if (this.value.length === 1 && this.value !== '+') {
+                this.value = '+7' + this.value;
+            }
+            
+            // Ограничение ввода только + и цифр
+            if (this.value.length > 0) {
+                if (this.value[0] !== '+') {
+                    this.value = '+' + this.value.replace(/[^\d]/g, '');
+                } else {
+                    this.value = '+' + this.value.substring(1).replace(/[^\d]/g, '');
+                }
+                
+                // Ограничение длины
+                if (this.value.length > 12) {
+                    this.value = this.value.substring(0, 12);
+                }
+            }
+            
+            const isValid = validatePhone(this.value);
+            this.classList.toggle('error', !isValid);
+            phoneError.style.display = !isValid && this.value ? 'block' : 'none';
+            updateSubmitButton();
+        });
+        
+        passwordInput.addEventListener('input', function() {
+            const isValid = validatePassword(this.value);
+            this.classList.toggle('error', !isValid);
+            passwordError.style.display = !isValid && this.value ? 'block' : 'none';
+            
+            // Обновление индикатора сложности пароля
+            const strengthClass = getPasswordStrength(this.value);
+            passwordStrength.className = 'strength-bar ' + strengthClass;
+            
+            // Обновляем проверку совпадения паролей
+            const isMatch = validatePasswordMatch(this.value, confirmPasswordInput.value);
+            confirmPasswordInput.classList.toggle('error', !isMatch);
+            confirmPasswordError.style.display = !isMatch && confirmPasswordInput.value ? 'block' : 'none';
+            
+            updateSubmitButton();
+        });
+        
+        confirmPasswordInput.addEventListener('input', function() {
+            const isValid = validatePasswordMatch(passwordInput.value, this.value);
+            this.classList.toggle('error', !isValid);
+            confirmPasswordError.style.display = !isValid && this.value ? 'block' : 'none';
+            updateSubmitButton();
+        });
+        
+        // Обработка отправки формы
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Финальная проверка всех полей перед отправкой
+            const isEmailValid = validateEmail(emailInput.value);
+            const isPhoneValid = validatePhone(phoneInput.value);
+            const isPasswordValid = validatePassword(passwordInput.value);
+            const isPasswordMatch = validatePasswordMatch(passwordInput.value, confirmPasswordInput.value);
+            
+            if (!isEmailValid || !isPhoneValid || !isPasswordValid || !isPasswordMatch) {
+                // Показываем все ошибки
+                emailInput.classList.toggle('error', !isEmailValid);
+                emailError.style.display = !isEmailValid && emailInput.value ? 'block' : 'none';
+                
+                phoneInput.classList.toggle('error', !isPhoneValid);
+                phoneError.style.display = !isPhoneValid && phoneInput.value ? 'block' : 'none';
+                
+                passwordInput.classList.toggle('error', !isPasswordValid);
+                passwordError.style.display = !isPasswordValid && passwordInput.value ? 'block' : 'none';
+                
+                confirmPasswordInput.classList.toggle('error', !isPasswordMatch);
+                confirmPasswordError.style.display = !isPasswordMatch && confirmPasswordInput.value ? 'block' : 'none';
+                
+                return;
+            }
+            
+            // Показываем сообщение об успехе
+            successMessage.style.display = 'block';
+            form.reset();
+            passwordStrength.className = 'strength-bar';
+            submitBtn.disabled = true;
+            
+            // Скрываем сообщение через 3 секунды
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        });
+        
+        // Инициализация
+        updateSubmitButton();
+    </script>
+</body>
+</html>
